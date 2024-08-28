@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Events</title>
+</head>
+<body>
+
+    <div id="container">
+        <div id="inner-container">
+            <a id="link" href="/dev/null">click</a>
+        </div>
+    </div>
+
+    <script>
+
+        document.addEventListener('click', function(e) {
+
+            console.log('body clicked');
+        });
+
+        document.getElementById('container').addEventListener('click', function(e) {
+
+            console.log('container clicked');
+
+        });
+
+        document.getElementById('inner-container').addEventListener('click', function(e) {
+
+            e.stopPropagation(); // prevent event bubbling to: container,body
+
+            console.log('inner container clicked');
+
+        });
+
+        document.getElementById('link').addEventListener('click', function(e) {
+
+            e.preventDefault();
+
+            e.stopImmediatePropagation(); // prevent event 2, event 3 and stop bubbling
+
+            console.log('linked clicked - event 1');
+
+        });
+
+        document.getElementById('link').addEventListener('click', function(e) {
+
+            e.preventDefault();
+
+            console.log('linked clicked - event 2');
+
+        });
+
+        document.getElementById('link').addEventListener('click', function(e) {
+
+            e.preventDefault();
+
+            console.log('linked clicked - event 3');
+
+        });
+
+
+
+    </script>
+</body>
+</html>

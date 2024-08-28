@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Star Wars</title>
+</head>
+
+<body>
+<h1>STAR WARS</h1>
+
+<button type="button" onclick="loadData()">Listar Personajes</button>
+
+<div>
+  <ul id='ulPersonajes'></ul>
+</div>
+
+<script>
+
+  function loadData() {
+    var xhttp = new XMLHttpRequest();
+
+    xhttp.onreadystatechange = function () {
+      if (this.readyState == 4 && this.status == 200) {
+        var o = JSON.parse(this.responseText);
+        document.getElementById("ulPersonajes").innerHTML = ""; //Vacio la lista HTML
+        //while(o.next != null){
+        for(let i=0;i<=10;i++){
+          let ul = document.getElementById("ulPersonajes");
+          let li = document.createElement("li");
+          li.appendChild(document.createTextNode(o.results[i].name));
+          ul.appendChild(li);
+        }
+        //xhttp.open("GET", o.next, true);
+        //xhttp.send();
+        //}
+      }
+    };
+    //for(let j=1;j<=10;j++){
+    xhttp.open("GET", "https://swapi.dev/api/people/?page=1", true);
+    xhttp.send();
+    //xhttp.open("GET", "https://swapi.dev/api/people/?page=2", true);
+    //xhttp.send();
+    //}
+  }
+</script>
+
+</body>
+
+</html>

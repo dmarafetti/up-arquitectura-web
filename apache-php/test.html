@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Async Requests</title>
+    <link href="./css/styles.css" rel="stylesheet" />
+</head>
+<body>
+
+    <h1>Protocolo HTTP</h1>
+    <img src="./images/server.png" />
+
+
+
+    <h3>Formulario Form Submit demo</h3>
+    <form class="form-inline" method="POST" action="admin.php">
+        <label>Name</label>
+        <input type="text" name="name"/>
+
+        <label>Abir Admin Page</label>
+        <button type="submit">Entrar</button>
+
+    </form>
+
+
+
+
+    <h3>Formulario AJAX demo</h3>
+    <form class="form-inline" >
+        <label>Count</label>
+        <input id="count" type="text" name="count"/>
+
+        <label>Filtrar</label>
+        <button id="enviar" type="button">enviar</button>
+        <!-- type="submit" -->
+    </form>
+
+    <div>
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">Type</th>
+              <th scope="col">Column heading</th>
+              <th scope="col">Column heading</th>
+              <th scope="col">Column heading</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+
+          </tbody>
+        </table>
+    </div>
+
+
+
+
+    <h3>Formulario SW</h3>
+    <form class="form-inline">
+
+        <label>Filtrar</label>
+        <button id="getStarwars" type="button">Listar</button>
+        <!-- type="submit" -->
+    </form>
+
+    <div>
+        <ul id="sw-list">
+
+        </ul>
+    </div>
+
+
+
+    <script type="text/javascript" >
+
+      const onResponse = function(event) {
+
+        let row = event.target.response;
+
+        document.getElementById('tbody').innerHTML = row;
+
+      };
+
+      document.addEventListener('DOMContentLoaded', function(){
+
+          document.getElementById('enviar').addEventListener('click', function(){
+
+            // get filters
+            let count = document.getElementById("count").value;
+
+            let request = new XMLHttpRequest();
+            request.addEventListener('load', onResponse);
+            request.open('GET', 'https://localhost:8101/test/data.php?count=' + count);
+            request.send();
+
+          });
+
+      }, false);
+
+    </script>
+
+
+
+
+
+    <script type="text/javascript">
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            document.getElementById("getStarwars").addEventListener('click', () => {
+
+                fetch('https://swapi.dev/api/people').then(response => response.json()).then(response => {
+
+                    const list = document.getElementById('sw-list');
+
+                    response.results.forEach(({name}) => {
+
+                        const listItem = document.createElement('li');
+
+                        const listText = document.createTextNode(name);
+
+                        listItem.appendChild(listText);
+
+                        list.appendChild(listItem);
+
+                    })
+
+                });
+
+            });
+
+        });
+
+    </script>
+
+
+
+
+
+
+</body>
+</html>

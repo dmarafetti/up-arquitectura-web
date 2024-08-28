@@ -1,0 +1,15 @@
+{
+  "name": "up-node-api",
+  "version": "1.0.0",
+  "description": "Nuestra primer API con Node.js",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "moment": "^2.22.1"
+  }
+}
