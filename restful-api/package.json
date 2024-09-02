@@ -1,0 +1,25 @@
+{
+  "name": "restful-api",
+  "version": "1.0.0",
+  "description": "Ejemplos usados en la presentacion de arquitectura rest",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "rest",
+    "js",
+    "api"
+  ],
+  "author": "Diego Marafetti",
+  "license": "ISC",
+  "dependencies": {
+    "express": "4.19.2",
+    "morgan": "1.10.0",
+    "cors": "2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "3.1.4"
+  }
+}
