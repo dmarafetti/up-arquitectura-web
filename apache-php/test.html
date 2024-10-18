@@ -4,14 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Async Requests</title>
-    <link href="./css/styles.css" rel="stylesheet" />
+    <link rel="stylesheet" href="./css/styles.css" />
+    <script  src="js/script.js"></script> <!-- defer async -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous">
+    </script>
 </head>
 <body>
 
     <h1>Protocolo HTTP</h1>
     <img src="./images/server.png" />
-
-
 
     <h3>Formulario Form Submit demo</h3>
     <form class="form-inline" method="POST" action="admin.php">
@@ -73,6 +76,8 @@
 
     <script type="text/javascript" >
 
+        console.log("inline script executed");
+
       const onResponse = function(event) {
 
         let row = event.target.response;
@@ -82,6 +87,8 @@
       };
 
       document.addEventListener('DOMContentLoaded', function(){
+
+          console.log('DOMContentLoaded');
 
           document.getElementById('enviar').addEventListener('click', function(){
 
