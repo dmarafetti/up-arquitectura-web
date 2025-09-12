@@ -1,6 +1,3 @@
-const database = require('../db/client')
-const {id, id} = require("../../example-modules/modules/module-2");
-
 
 class Client {
 
@@ -61,6 +58,11 @@ class Client {
         this.#edad = value;
     }
 
+    toJSON() {
+
+        return {id: this.#id, nombre: this.#nombre, edad: this.#edad};
+    }
+
 }
 
 
@@ -107,7 +109,7 @@ class ClientService {
 
         return new Promise((resolve, reject) => {
 
-            let client = this.#clients.find(c => c.id === id);
+            let client = this.#clients.find(c => c.id == id);
 
             if(client) {
 
@@ -130,7 +132,7 @@ class ClientService {
 
         return new Promise(resolve => {
 
-            this.#clients.push(client);
+            this.#clients.push(new Client(client));
 
             setTimeout(() => {
 
@@ -147,9 +149,8 @@ class ClientService {
      */
     deleteById(id) {
 
-        this.#clients = this.#clients.filter(c => c.id !== req.params.id);
+        this.#clients = this.#clients.filter(c => c.id != id);
     }
-
 
 }
 

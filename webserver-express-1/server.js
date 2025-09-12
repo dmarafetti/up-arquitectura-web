@@ -1,7 +1,5 @@
 const express    = require('express');
-const bodyParser = require('body-parser');
 const moment     = require('moment');
-const wrap       = require('co-express');
 const {service, Client} = require('./services/clientsService');
 
 
@@ -24,9 +22,7 @@ app.use((req, res, next) => {
 
     next();
 
-
 });
-
 
 
 
@@ -45,8 +41,6 @@ app.get('/', async (req, res) => {
 
     });
 
-
-
     res.send(
         `<html>
             <head>
@@ -59,8 +53,6 @@ app.get('/', async (req, res) => {
             </body>
         </html>`
     );
-
-
 });
 
 
@@ -71,11 +63,7 @@ app.get('/api/clients', async (req, res) => {
 
     let clients = await service.getAll();
 
-    res.json(clients);
-
-    // res. content-type = application/json
-    // res.write(JSON.stringify(clients))
-    // res.end();
+    res.json(clients.map(client => client.toJSON()));
 
 });
 
@@ -84,13 +72,13 @@ app.get('/api/clients', async (req, res) => {
 // get clients by id
 
 
-app.get('/api/clients/:idCliente', async (req, res) => {
+app.get('/api/clients/:id', async (req, res) => {
 
     try {
 
-        let cli = await service.getById(req.params.idCliente); // 1234
+        let cli = await service.getById(req.params.id); // 1234
 
-        res.json(cli);
+        res.json(cli.toJSON());
 
     } catch(ex) {
 
@@ -109,7 +97,7 @@ app.post('/api/clients', async (req, res) => {
 
     let newClient = await service.add(req.body); // => req.body = {nombre, edad}
 
-    res.statusMessage = "CLIENTE CREADO";
+    // res.statusMessage = "CLIENTE CREADO";
 
     res.status(201).send(newClient);
 
