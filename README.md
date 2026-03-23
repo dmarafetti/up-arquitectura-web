@@ -22,6 +22,7 @@ Repositorio oficial de la materia Arquitectura Web. Departamento de Ingeniería 
 
 - [Requerimientos](#Requerimientos)
 - [Entorno de desarrollo](#installation)
+- [Trabajo Práctico Integrador](./trabajo-practico-spec/README.md)
 - [Contributing](#contributing)
 - [Contacto](#contacto)
 
