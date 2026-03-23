@@ -22,7 +22,7 @@ Repositorio oficial de la materia Arquitectura Web. Departamento de Ingeniería 
 
 - [Requerimientos](#Requerimientos)
 - [Entorno de desarrollo](#installation)
-- [Trabajo Práctico Integrador](./trabajo-practico-spec/README.md)
+- [Trabajo Práctico](./trabajo-practico-spec/README.md)
 - [Contributing](#contributing)
 - [Contacto](#contacto)
 
@@ -49,9 +49,11 @@ Please adhere to this project's `code of conduct`.
 
 
 
-
 ## Contacto
 
 [(Back to top)](#contenidos)
 
-Diego Marafetti - [@email](mailto:dmaraf@palermo.edu)
+Diego Marafetti - [dmaraf@palermo.edu](mailto:dmaraf@palermo.edu)
+
+> [!NOTE]  
+> La comunicación preferentemente por Pronto
