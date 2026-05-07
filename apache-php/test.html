@@ -106,44 +106,5 @@
 
     </script>
 
-
-
-
-
-    <script type="text/javascript">
-
-        document.addEventListener('DOMContentLoaded', () => {
-
-            document.getElementById("getStarwars").addEventListener('click', () => {
-
-                fetch('https://swapi.dev/api/people').then(response => response.json()).then(response => {
-
-                    const list = document.getElementById('sw-list');
-
-                    response.results.forEach(({name}) => {
-
-                        const listItem = document.createElement('li');
-
-                        const listText = document.createTextNode(name);
-
-                        listItem.appendChild(listText);
-
-                        list.appendChild(listItem);
-
-                    })
-
-                });
-
-            });
-
-        });
-
-    </script>
-
-
-
-
-
-
 </body>
 </html>
