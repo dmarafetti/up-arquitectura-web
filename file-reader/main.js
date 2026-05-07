@@ -1,30 +1,24 @@
 const fs = require("fs", "utf8");
 
-// REQUEST IO: ............ssss
-//1
-//2
-//3
-fs.readFile("./readme.txt", function(err, data) {
+// REQUEST IO: OK
 
-    if(err) {
-
-        // catch err
-
-        console.log("Error: " + err );
-
-        return;
-    }
-
-    // 3
+function imprimirFile(err, data) {
 
     console.log(data);
+}
 
-});
+
+console.log("Antes del readFile"); // 1
+
+// fs.readFile("./readme.txt", imprimirFile);
+const buffer = fs.readFileSync("./readme.txt");
 
 
-// 2
 
-console.log('hola');
+console.log(buffer);
+
+console.log('Despues del readFile'); //
+
 
 
 
