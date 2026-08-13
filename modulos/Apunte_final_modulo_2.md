@@ -19,7 +19,7 @@ Cada componente cumple un rol específico:
 - **Scheme (esquema):** el protocolo a usar para acceder al recurso (`http`, `https`, `mailto`, `ftp`, entre otros). Indica al cliente qué mecanismo aplicar para interpretar el resto de la URL.
 - **Authority (autoridad):** combina, opcionalmente, información de usuario, el host (dominio o dirección IP) y el puerto, separados por dos puntos cuando el puerto se especifica explícitamente.
 - **Path (ruta):** la ubicación del recurso dentro del servidor, expresada como una secuencia de segmentos separados por barras. En aplicaciones web modernas, el path suele ser un identificador abstracto más que una ruta literal en el sistema de archivos del servidor.
-- **Query (consulta):** información adicional en pares clave-valor, precedida por `?` y con los pares separados por `&`. Se usa habitualmente para parametrizar la request: filtros, paginación, términos de búsqueda.
+- **Query (consulta):** información adicional en pares clave-valor, precedida por `?` y con los pares separados por `&`. Se usa habitualmente para parametrizar el request: filtros, paginación, términos de búsqueda.
 - **Fragment (fragmento o anclaje):** un identificador secundario, precedido por `#`, que referencia una sección específica dentro del recurso ya descargado. Es importante remarcar que el fragmento **nunca se envía al servidor**: se resuelve enteramente del lado del cliente, una vez que el recurso ya fue descargado.
 
 Un ejemplo concreto ayuda a fijar estos componentes: en `https://developer.mozilla.org/en-US/docs/Learn_web_development?q=URL#summary`, el esquema es `https`, el dominio es `developer.mozilla.org`, la ruta es `/en-US/docs/Learn_web_development`, la query es `q=URL` y el fragmento es `summary`. Cada una de estas piezas cumple un rol distinto, y un cliente HTTP, o un desarrollador leyendo el código de una aplicación, debe poder identificarlas para razonar correctamente sobre qué recurso se está solicitando y con qué parámetros.
@@ -33,7 +33,7 @@ flowchart LR
   A --> F["Fragment: detalle<br/>(no se envía al servidor)"]
 ```
 
-**Figura 1 — Componentes de una URL.** Cada URL se descompone en esquema, autoridad, ruta, query y fragmento; el fragmento es el único componente que el navegador resuelve localmente sin transmitirlo en la request HTTP.
+**Figura 1 — Componentes de una URL.** Cada URL se descompone en esquema, autoridad, ruta, query y fragmento; el fragmento es el único componente que el navegador resuelve localmente sin transmitirlo en el request HTTP.
 
 ### Diseñando rutas para recursos
 
@@ -139,7 +139,7 @@ Content-Length: 49
 nombre=Ana&email=ana%40ejemplo.com
 ```
 
-El **recurso-objetivo** (*request-target*) puede tomar distintas formas según el método y el contexto: la **forma de origen** (`/path?query=valor`) es la más común en requests directas de navegador a servidor; la **forma absoluta** (`https://ejemplo.com/path`) se usa típicamente cuando la request pasa por un proxy; la **forma de autoridad** (`ejemplo.com:443`) es exclusiva del método `CONNECT`; y la **forma de asterisco** (`*`) se usa con `OPTIONS` cuando quiere consultarse sobre el servidor en su conjunto, no sobre un recurso puntual.
+El **recurso-objetivo** (*request-target*) puede tomar distintas formas según el método y el contexto: la **forma de origen** (`/path?query=valor`) es la más común en requests directas de navegador a servidor; la **forma absoluta** (`https://ejemplo.com/path`) se usa típicamente cuando el request pasa por un proxy; la **forma de autoridad** (`ejemplo.com:443`) es exclusiva del método `CONNECT`; y la **forma de asterisco** (`*`) se usa con `OPTIONS` cuando quiere consultarse sobre el servidor en su conjunto, no sobre un recurso puntual.
 
 Solo los métodos `POST`, `PUT` y `PATCH` suelen incluir un body en el request, que puede contener datos de formulario (pares clave-valor), un objeto JSON, o datos multipart (que se detallan más abajo).
 
@@ -314,7 +314,7 @@ Los métodos HTTP (también llamados verbos) especifican la acción a aplicar so
 - **DELETE** *(delete)*: elimina un recurso existente.
 - **HEAD**: idéntico a `GET`, pero sin retornar body en el response. Se usa para recuperar únicamente los headers y así verificar, por ejemplo, si un recurso cambió sin descargarlo completo.
 - **OPTIONS**: solicita información sobre las opciones de comunicación disponibles o las capacidades del servidor para un recurso, sin iniciar la petición del recurso en sí. Es el mecanismo que usan los navegadores para las verificaciones previas de CORS entre dominios distintos.
-- **TRACE**: realiza una prueba de bucle invertido (*loop-back*) a lo largo del camino hacia el recurso, devolviendo la request tal como fue recibida por el servidor final, principalmente con fines de diagnóstico.
+- **TRACE**: realiza una prueba de bucle invertido (*loop-back*) a lo largo del camino hacia el recurso, devolviendo el request tal como fue recibida por el servidor final, principalmente con fines de diagnóstico.
 - **CONNECT**: establece un túnel hacia el servidor identificado por el recurso, típicamente usado para establecer conexiones HTTPS a través de un proxy.
 
 Como propuesta más reciente, el RFC 10008 (2026) estandariza el método **QUERY**, pensado para cubrir un caso que ni `GET` ni `POST` resuelven bien: consultas de solo lectura cuyos parámetros son demasiado voluminosos para codificarse en la URL. A diferencia de `GET`, `QUERY` admite un body en el request; a diferencia de `POST`, es explícitamente *safe* e idempotente, preservando la posibilidad de cachear la respuesta y reintentar el request sin riesgo.
@@ -412,7 +412,7 @@ async function eliminarRecurso(id) {
     method: 'DELETE',
   });
   if (response.status === 204) {
-    return true; // eliminado, sin contenido en la response
+    return true; // eliminado, sin contenido en el response
   }
   if (response.status === 404) {
     return true; // ya no existe: el efecto neto es el mismo (idempotencia)
@@ -431,7 +431,7 @@ Estas piezas (URL, mensajes, headers, métodos, status codes) son el vocabulario
 
 ## Anexo 1 — El header `Idempotency-Key`
 
-La idempotencia de `GET`, `PUT` y `DELETE` surge naturalmente de su semántica, pero `POST`, al crear un recurso nuevo en cada invocación, no la tiene por diseño. Sin embargo, en sistemas distribuidos esto es un problema real y frecuente: si un cliente envía un `POST` para crear una orden de compra y la conexión se corta antes de recibir la response, el cliente no sabe si la orden se creó o no. Reintentar sin más puede duplicar la orden; no reintentar puede dejar al usuario sin haber completado la operación que sí quería hacer. Este es, en esencia, el problema que la idempotencia busca resolver a nivel de diseño de API, más allá de la propiedad matemática del método.
+La idempotencia de `GET`, `PUT` y `DELETE` surge naturalmente de su semántica, pero `POST`, al crear un recurso nuevo en cada invocación, no la tiene por diseño. Sin embargo, en sistemas distribuidos esto es un problema real y frecuente: si un cliente envía un `POST` para crear una orden de compra y la conexión se corta antes de recibir el response, el cliente no sabe si la orden se creó o no. Reintentar sin más puede duplicar la orden; no reintentar puede dejar al usuario sin haber completado la operación que sí quería hacer. Este es, en esencia, el problema que la idempotencia busca resolver a nivel de diseño de API, más allá de la propiedad matemática del método.
 
 **Por qué importa en sistemas distribuidos.** Las conexiones de red pueden fallar de forma parcial: el cliente puede no recibir el response aunque el servidor sí haya procesado el request con éxito. En ese escenario ambiguo, la única forma segura de reintentar sin arriesgarse a duplicar el efecto es que la propia operación tolere ejecutarse más de una vez sin generar resultados distintos. Esto es especialmente crítico en operaciones con consecuencias difíciles de revertir (transacciones de pago, creación de órdenes, envío de notificaciones), donde un duplicado no es un simple inconveniente sino un error de negocio con impacto real (cobrar dos veces, enviar un mismo correo duplicado).
 
