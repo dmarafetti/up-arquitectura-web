@@ -32,7 +32,7 @@ Un sistema que aspira a ser RESTful, según la formulación original de Fielding
 
 - **Cliente-servidor.** Separación clara de responsabilidades entre el cliente (que gestiona la interfaz de usuario y el estado de la interacción) y el servidor (que gestiona el almacenamiento y el procesamiento de datos). Esta separación permite que ambas partes evolucionen de forma independiente: un cambio en la interfaz de usuario no debería requerir cambios en el servidor, y viceversa.
 - **Stateless (sin estado).** El servidor no almacena ningún contexto sobre el cliente entre un request (solicitud) y el siguiente; cada request debe contener toda la información necesaria para ser entendido y procesado de forma autónoma. Esta restricción, que se retoma en detalle en la sección siguiente, es una de las que más impacto tiene en la escalabilidad del sistema.
-- **Cacheable (cacheable).** Los responses (respuestas) deben, implícita o explícitamente, indicar si son cacheables o no. Esto permite que el cliente (o intermediarios en el camino, como un proxy) reutilicen una response previa para requests equivalentes futuras, reduciendo la cantidad de interacciones necesarias entre cliente y servidor.
+- **Cacheable (cacheable).** Los responses (respuestas) deben, implícita o explícitamente, indicar si son cacheables o no. Esto permite que el cliente (o intermediarios en el camino, como un proxy) reutilicen un response previo para requests equivalentes futuros, reduciendo la cantidad de interacciones necesarias entre cliente y servidor.
 - **Sistema en capas (layered system).** Un cliente no puede saber, ni necesita saber, si está conectado directamente al servidor que finalmente procesa su request o a un intermediario (un proxy, un balanceador de carga, una capa de caché). Esta restricción permite insertar o modificar capas intermedias sin que el cliente deba adaptarse.
 - **Interfaz uniforme (uniform interface).** La restricción más distintiva de REST, que a su vez se descompone en varias sub-restricciones: identificación de recursos (cada recurso tiene un identificador único, típicamente una URI), manipulación de recursos a través de representaciones (el cliente interactúa con representaciones del recurso, como JSON o XML, no con el recurso "real" en sí), mensajes autodescriptivos (cada mensaje incluye la información necesaria para procesarlo, como su tipo de contenido) y HATEOAS (*Hypermedia As The Engine Of Application State*: los responses incluyen enlaces que describen qué acciones son posibles a continuación, en vez de que el cliente deba conocerlas de antemano).
 - **Code on demand (opcional).** La única restricción opcional: el servidor puede extender temporalmente la funcionalidad del cliente enviándole código ejecutable (el ejemplo histórico es JavaScript entregado por el servidor y ejecutado por el navegador).
@@ -99,7 +99,7 @@ Esta restricción tiene una consecuencia arquitectónica directa: como ninguna r
 // (un token), sin depender de que el servidor recuerde una sesión previa.
 app.get('/pedidos', (req, res) => {
   const token = req.headers['authorization'];
-  const usuario = validarToken(token); // toda la info necesaria viaja en esta request
+  const usuario = validarToken(token); // toda la info necesaria viaja en este request
   if (!usuario) return res.status(401).json({ error: 'No autorizado' });
   const pedidos = obtenerPedidosDeUsuario(usuario.id);
   res.json(pedidos);
@@ -183,7 +183,7 @@ flowchart TD
 **Figura 2 — Modelo de Madurez de Richardson.** Cada nivel incorpora las características del anterior: del Nivel 0 (un único endpoint que tuneliza todo por POST) al Nivel 3 (responses que incluyen hipermedia describiendo las acciones disponibles), pasando por la introducción de recursos individuales (Nivel 1) y el uso correcto de verbos HTTP y status codes (Nivel 2).
 
 ```javascript
-// Ejemplo en Node.js: una response de Nivel 3, con HATEOAS.
+// Ejemplo en Node.js: un response de Nivel 3, con HATEOAS.
 // El cliente no necesita conocer de antemano la URI de "cancelar":
 // la descubre en los enlaces (_links) de la propia response.
 app.get('/turnos/:id', (req, res) => {
@@ -208,7 +208,7 @@ app.get('/turnos/:id', (req, res) => {
 
 ## Limitaciones y realidad práctica
 
-Vale la pena cerrar el desarrollo conceptual con una mirada honesta a la distancia entre el ideal REST y su implementación real en la industria. HTTP fue diseñado en los años 90 para la transferencia de hipertexto; las aplicaciones web modernas tienen necesidades bastante más complejas (streaming, operaciones en tiempo real, autenticación avanzada) que seguir "HTTP tal como fue pensado" originalmente puede no resolver bien. El ejemplo más claro es la comunicación bidireccional: una aplicación de chat necesita que el servidor pueda enviar mensajes al cliente en cualquier momento, sin que medie una request previa, algo que el modelo request-response puro de HTTP no ofrece. Por eso este tipo de aplicaciones suele recurrir a WebSockets en lugar de HTTP clásico, precisamente porque HTTP no fue diseñado para ese caso de uso: en el modelo request-response puro, el servidor no puede "empujar" datos espontáneamente hacia el cliente sin que medie una request previa de este.
+Vale la pena cerrar el desarrollo conceptual con una mirada honesta a la distancia entre el ideal REST y su implementación real en la industria. HTTP fue diseñado en los años 90 para la transferencia de hipertexto; las aplicaciones web modernas tienen necesidades bastante más complejas (streaming, operaciones en tiempo real, autenticación avanzada) que seguir "HTTP tal como fue pensado" originalmente puede no resolver bien. El ejemplo más claro es la comunicación bidireccional: una aplicación de chat necesita que el servidor pueda enviar mensajes al cliente en cualquier momento, sin que medie un request previo, algo que el modelo request-response puro de HTTP no ofrece. Por eso este tipo de aplicaciones suele recurrir a WebSockets en lugar de HTTP clásico, precisamente porque HTTP no fue diseñado para ese caso de uso: en el modelo request-response puro, el servidor no puede "empujar" datos espontáneamente hacia el cliente sin que medie un request previo de este.
 
 En la práctica, además, muchas APIs que se autodenominan "RESTful" no siguen estrictamente los principios de REST o de HTTP: usan `POST` para operaciones que semánticamente deberían ser `GET` (a veces por limitaciones de longitud en la URL), o directamente ignoran HATEOAS porque agrega complejidad de desarrollo y los clientes suelen tener rutas hardcodeadas de antemano. Esto no necesariamente convierte a esas APIs en "incorrectas": suele ser una decisión consciente que prioriza la simplicidad y las necesidades concretas del proyecto por sobre la pureza arquitectónica.
 

@@ -163,7 +163,7 @@ La **frase de razón** (*reason-phrase*, como "Created" en el ejemplo) es un tex
 Un matiz importante sobre el formato en HTTP/2: en esta versión, los mensajes ya no viajan como texto plano con una línea de inicio literal, sino empaquetados en un **framing binario**. En su lugar, HTTP/2 usa **pseudo-headers** (con nombres que comienzan con `:`) para representar la misma información que antes iba en la línea de inicio: `:method`, `:scheme`, `:authority` y `:path` en requests, y `:status` en responses. Este cambio de formato habilita la multiplexación de múltiples mensajes sobre una misma conexión y la compresión de headers mediante el algoritmo HPACK, pero preserva exactamente la misma semántica de mensaje que HTTP/1.1: un cliente que arma un request contra un servidor HTTP/2 razona en los mismos términos de método, ruta y headers que contra uno HTTP/1.1.
 
 ```javascript
-// Ejemplo: construir una request con fetch, especificando método,
+// Ejemplo: construir un request con fetch, especificando método,
 // headers y body — las tres piezas centrales de un mensaje HTTP.
 async function crearUsuario(nombre, email) {
   const response = await fetch('https://ejemplo.com/users', {
@@ -277,7 +277,7 @@ Network\r\n
 
 En este ejemplo, `7` (hexadecimal, equivalente a 7 en decimal) indica que el fragmento que sigue tiene 7 bytes ("Mozilla"), `9` indica 9 bytes ("Developer"), y así sucesivamente; el fragmento final `0\r\n\r\n` le informa al cliente que no hay más datos, sin que en ningún momento haya sido necesario declarar por adelantado el tamaño total del body (que en este caso sería la suma de las tres palabras, mezclada con overhead de protocolo que el cliente descarta al reensamblar el contenido real).
 
-Dos precisiones importantes sobre esta codificación. Primero, `Content-Length` y `Transfer-Encoding: chunked` son **mutuamente excluyentes**: un mensaje no puede declarar ambos a la vez, porque son dos estrategias alternativas para resolver el mismo problema (saber dónde termina el body). Segundo, `Transfer-Encoding` es un header **hop-by-hop** (a diferencia de `Content-Length`, que es end-to-end): un proxy intermedio puede recibir una response chunked y retransmitirla al cliente final ya con un `Content-Length` fijo, si en algún punto de la cadena se terminó de acumular el contenido completo, porque la codificación de transferencia es una decisión de cada tramo de la conexión, no una propiedad inmutable del recurso.
+Dos precisiones importantes sobre esta codificación. Primero, `Content-Length` y `Transfer-Encoding: chunked` son **mutuamente excluyentes**: un mensaje no puede declarar ambos a la vez, porque son dos estrategias alternativas para resolver el mismo problema (saber dónde termina el body). Segundo, `Transfer-Encoding` es un header **hop-by-hop** (a diferencia de `Content-Length`, que es end-to-end): un proxy intermedio puede recibir un response chunked y retransmitirlo al cliente final ya con un `Content-Length` fijo, si en algún punto de la cadena se terminó de acumular el contenido completo, porque la codificación de transferencia es una decisión de cada tramo de la conexión, no una propiedad inmutable del recurso.
 
 En Node.js, el módulo nativo `http` activa automáticamente la codificación chunked cuando el código no fija explícitamente un `Content-Length` antes de empezar a escribir el body en múltiples llamadas a `res.write()`:
 
@@ -314,7 +314,7 @@ Los métodos HTTP (también llamados verbos) especifican la acción a aplicar so
 - **DELETE** *(delete)*: elimina un recurso existente.
 - **HEAD**: idéntico a `GET`, pero sin retornar body en el response. Se usa para recuperar únicamente los headers y así verificar, por ejemplo, si un recurso cambió sin descargarlo completo.
 - **OPTIONS**: solicita información sobre las opciones de comunicación disponibles o las capacidades del servidor para un recurso, sin iniciar la petición del recurso en sí. Es el mecanismo que usan los navegadores para las verificaciones previas de CORS entre dominios distintos.
-- **TRACE**: realiza una prueba de bucle invertido (*loop-back*) a lo largo del camino hacia el recurso, devolviendo el request tal como fue recibida por el servidor final, principalmente con fines de diagnóstico.
+- **TRACE**: realiza una prueba de bucle invertido (*loop-back*) a lo largo del camino hacia el recurso, devolviendo el request tal como fue recibido por el servidor final, principalmente con fines de diagnóstico.
 - **CONNECT**: establece un túnel hacia el servidor identificado por el recurso, típicamente usado para establecer conexiones HTTPS a través de un proxy.
 
 Como propuesta más reciente, el RFC 10008 (2026) estandariza el método **QUERY**, pensado para cubrir un caso que ni `GET` ni `POST` resuelven bien: consultas de solo lectura cuyos parámetros son demasiado voluminosos para codificarse en la URL. A diferencia de `GET`, `QUERY` admite un body en el request; a diferencia de `POST`, es explícitamente *safe* e idempotente, preservando la posibilidad de cachear la respuesta y reintentar el request sin riesgo.
