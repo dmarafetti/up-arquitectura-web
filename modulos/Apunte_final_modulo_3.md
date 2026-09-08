@@ -178,6 +178,11 @@ flowchart TD
   N0["Nivel 0<br/>Swamp of POX<br/>(un solo endpoint, todo por POST)"] --> N1["Nivel 1<br/>Recursos<br/>(URIs por entidad)"]
   N1 --> N2["Nivel 2<br/>Verbos HTTP<br/>(GET/POST/PUT/DELETE + status codes)"]
   N2 --> N3["Nivel 3<br/>HATEOAS<br/>(enlaces de acciones disponibles)"]
+
+  style N0 fill:#fcd9a5,stroke:#d2691e,color:#1b1b1b
+  style N1 fill:#fff2ac,stroke:#b8960c,color:#1b1b1b
+  style N2 fill:#a9d6f5,stroke:#1f6fb2,color:#1b1b1b
+  style N3 fill:#c6efce,stroke:#2e7d32,color:#1b1b1b
 ```
 
 **Figura 2 — Modelo de Madurez de Richardson.** Cada nivel incorpora las características del anterior: del Nivel 0 (un único endpoint que tuneliza todo por POST) al Nivel 3 (responses que incluyen hipermedia describiendo las acciones disponibles), pasando por la introducción de recursos individuales (Nivel 1) y el uso correcto de verbos HTTP y status codes (Nivel 2).
@@ -212,7 +217,7 @@ Vale la pena cerrar el desarrollo conceptual con una mirada honesta a la distanc
 
 En la práctica, además, muchas APIs que se autodenominan "RESTful" no siguen estrictamente los principios de REST o de HTTP: usan `POST` para operaciones que semánticamente deberían ser `GET` (a veces por limitaciones de longitud en la URL), o directamente ignoran HATEOAS porque agrega complejidad de desarrollo y los clientes suelen tener rutas hardcodeadas de antemano. Esto no necesariamente convierte a esas APIs en "incorrectas": suele ser una decisión consciente que prioriza la simplicidad y las necesidades concretas del proyecto por sobre la pureza arquitectónica.
 
-Esta tensión entre el ideal y la práctica también dio lugar a alternativas más recientes que atacan directamente algunas limitaciones de REST. **GraphQL**, por ejemplo, permite que el cliente especifique exactamente qué datos necesita en una única consulta, en vez de tener que encadenar varias requests HTTP a distintos recursos para reunir la misma información. Donde una API REST tradicional podría requerir dos requests separadas (`GET /users/123` seguido de `GET /users/123/orders`) para reunir un usuario y sus órdenes, GraphQL permite combinar ambas necesidades en una sola consulta, potencialmente más eficiente en escenarios donde el cliente necesita datos relacionados de múltiples recursos. Esto no invalida a REST como estilo arquitectónico general, pero sí muestra que, para ciertos patrones de consumo de datos, existen alternativas de diseño que resuelven mejor un problema puntual que REST no ataca directamente.
+Esta tensión entre el ideal y la práctica también dio lugar a alternativas más recientes que atacan directamente algunas limitaciones de REST. **GraphQL**, por ejemplo, permite que el cliente especifique exactamente qué datos necesita en una única consulta, en vez de tener que encadenar varias requests HTTP a distintos recursos para reunir la misma información. Donde una API REST tradicional podría requerir dos requests separadas (`GET /users/123` seguido de `GET /users/123/orders`) para reunir un usuario y sus órdenes, GraphQL permite combinar ambas necesidades en una sola consulta, potencialmente más eficiente en escenarios donde el cliente necesita datos relacionados de múltiples recursos. Esto no invalida a REST como estilo arquitectónico general, pero sí muestra que, para ciertos patrones de consumo de datos, existen alternativas de diseño que resuelven mejor un problema puntual que REST no ataca directamente. (Ver Anexo 2 para una comparación más detallada entre REST y GraphQL.)
 
 Por esta combinación de factores, la inmensa mayoría de las APIs que la industria llama "REST" hoy en día se ubican, en términos del Modelo de Madurez de Richardson, en el Nivel 2: usan URIs por recurso, aplican correctamente los verbos HTTP y los códigos de estado, pero no implementan hipermedia. Esto no las convierte en "API mal diseñadas": simplemente son APIs pragmáticas que adoptan las restricciones de REST que ofrecen mejor relación costo-beneficio en su contexto particular, sin perseguir la conformidad estricta con la definición original de Fielding. Entender esta brecha, y poder nombrarla con precisión usando el vocabulario del Modelo de Madurez, es, en definitiva, uno de los aprendizajes más útiles y aplicables de este apunte.
 
@@ -301,6 +306,64 @@ async function obtenerUsuarioSOAP(id) {
 
 Este contraste en código ilustra, de forma concreta, la diferencia de fondo entre ambos enfoques: REST aprovecha la semántica de HTTP y la identidad propia de cada recurso; SOAP encapsula toda la información de la operación dentro de un mensaje autocontenido, transportado sobre un único endpoint de servicio, independientemente de qué protocolo de transporte se use por debajo.
 
+## Anexo 2 — REST vs. GraphQL
+
+Este anexo profundiza la comparación entre REST y GraphQL introducida brevemente en la sección "Limitaciones y realidad práctica", porque GraphQL es, junto con SOAP, una de las alternativas de diseño más relevantes frente a las que REST suele contrastarse en la práctica profesional actual.
+
+### Qué es GraphQL
+
+**GraphQL** es un lenguaje de consulta (*query language*) para APIs, junto con un runtime del lado del servidor que ejecuta esas consultas contra los datos existentes, desarrollado originalmente por Facebook y liberado como especificación abierta en 2015. A diferencia de REST, que es un estilo arquitectónico, GraphQL es más específico: define un lenguaje de consultas propio, un sistema de tipos fuertemente tipado (el *schema*) que describe exactamente qué datos y operaciones expone la API, y un único endpoint HTTP (típicamente `POST /graphql`) a través del cual se envían todas las consultas.
+
+### Un endpoint vs. múltiples recursos
+
+La diferencia estructural más visible entre ambos enfoques es esta: REST modela la API como una colección de recursos, cada uno con su propia URI (`/usuarios/123`, `/usuarios/123/pedidos`), y el cliente combina múltiples requests para reunir datos relacionados. GraphQL, en cambio, expone un **único endpoint**, y es el cuerpo de la consulta (no la URL) el que determina qué datos se piden y con qué forma se devuelven. Esto invierte el control: en REST, el servidor decide qué forma tiene cada response; en GraphQL, el cliente decide qué campos necesita en cada consulta puntual.
+
+### Over-fetching y under-fetching
+
+Este es el problema concreto que motivó el diseño de GraphQL. En una API REST, un endpoint como `GET /usuarios/123` devuelve una representación fija del recurso, típicamente con todos sus campos, aunque el cliente solo necesite el nombre y el email (*over-fetching*, se transmiten más datos de los necesarios). Si, en cambio, el cliente necesita datos que abarcan varios recursos relacionados (el usuario y sus últimos tres pedidos), REST suele obligar a encadenar varias requests (*under-fetching*, cada request individual trae menos de lo que el cliente necesita en conjunto). GraphQL ataca ambos problemas a la vez: el cliente especifica exactamente los campos que quiere, de uno o varios tipos relacionados, en una sola consulta.
+
+```graphql
+# Ejemplo de query GraphQL: pedir el nombre y email de un usuario,
+# junto con el total de sus últimos 3 pedidos, en una sola consulta.
+query {
+  usuario(id: "123") {
+    nombre
+    email
+    pedidos(limit: 3) {
+      id
+      total
+      fecha
+    }
+  }
+}
+```
+
+La misma necesidad de datos, resuelta con REST tradicional, requeriría típicamente dos requests separadas (`GET /usuarios/123` y `GET /usuarios/123/pedidos?limit=3`), cada una devolviendo además campos que en este caso puntual no se necesitan.
+
+### Schema y tipado
+
+GraphQL exige definir un **schema**: una descripción formal, fuertemente tipada, de todos los tipos de datos que la API expone y las operaciones posibles sobre ellos (*queries* para lectura, *mutations* para escritura, *subscriptions* para actualizaciones en tiempo real). Este schema actúa como contrato explícito entre cliente y servidor, y habilita herramientas de introspección: un cliente puede consultar el propio schema para descubrir qué campos y operaciones existen, sin depender de documentación externa. REST no exige un mecanismo de contrato formal equivalente; herramientas como OpenAPI/Swagger cumplen un rol similar, pero no son parte intrínseca del estilo REST como sí lo es el schema en GraphQL.
+
+### Caching
+
+Esta es una de las áreas donde REST mantiene una ventaja práctica clara. Como cada recurso REST tiene su propia URI estable, el cacheo HTTP estándar (basado en la URL como clave de caché, headers como `Cache-Control` o `ETag`, e intermediarios como proxies o CDNs) funciona de forma natural y transparente. GraphQL, al operar mayormente sobre un único endpoint vía `POST`, no puede apoyarse en el cacheo HTTP estándar de la misma manera: distintas consultas comparten la misma URL, por lo que cachear requiere lógica adicional del lado del cliente o del servidor (por ejemplo, cacheo a nivel de campo o de objeto individual, como hace Apollo Client), en vez de heredar el cacheo casi gratuito que ofrece HTTP sobre REST.
+
+### Cuándo conviene cada uno
+
+**GraphQL tiende a ser la opción preferida cuando:**
+
+- El cliente necesita combinar datos de múltiples recursos relacionados en una sola pantalla o vista (por ejemplo, apps móviles con conexiones de red limitadas, donde minimizar la cantidad de requests importa).
+- Existen múltiples clientes con necesidades de datos muy distintas entre sí (una app web y una app móvil que muestran subconjuntos diferentes de los mismos datos), evitando así tener que crear endpoints REST a medida para cada cliente.
+- El equipo valora contar con un schema fuertemente tipado como contrato explícito y autodocumentado entre frontend y backend.
+
+**REST sigue siendo la opción preferida cuando:**
+
+- El cacheo HTTP estándar (a nivel de URL) aporta un beneficio de rendimiento importante y sencillo de aprovechar.
+- La API es simple, con recursos bien delimitados que no requieren combinar datos de múltiples fuentes en una sola consulta.
+- Se prioriza la simplicidad de infraestructura: REST no exige un runtime adicional del lado del servidor para interpretar consultas, ni un sistema de resolución de campos anidados.
+
+Al igual que con SOAP, esta comparación no implica que GraphQL sea una evolución superior de REST en todos los sentidos: cada uno prioriza un conjunto distinto de propiedades, y la elección depende de las necesidades concretas de los clientes que consumen la API.
+
 ## Bibliografía consultada
 
 - Wikipedia (inglés). (s.f.). *REST*. Definición, origen en la tesis doctoral de Roy Fielding (2000), las seis restricciones arquitectónicas, concepto de recurso y representación, propiedad stateless, y limitaciones prácticas (cookies). https://en.wikipedia.org/wiki/REST
@@ -309,3 +372,4 @@ Este contraste en código ilustra, de forma concreta, la diferencia de fondo ent
 - Fowler, M. (s.f.). *Architecture*. Definiciones de arquitectura de software (Ralph Johnson), por qué es difícil de definir, y su relación con la velocidad de desarrollo a largo plazo. https://martinfowler.com/architecture/
 - Amazon Web Services (AWS). (s.f.). *The difference between SOAP and REST*. Comparación de formato de datos, gestión de estado, rendimiento, escalabilidad y seguridad entre ambos enfoques. https://aws.amazon.com/compare/the-difference-between-soap-rest/
 - Red Hat. (s.f.). *What's the difference between SOAP and REST*. Definiciones, formato de datos, transporte, y casos de uso recomendados para cada enfoque. https://www.redhat.com/en/topics/integration/whats-the-difference-between-soap-rest
+- Amazon Web Services (AWS). (s.f.). *The difference between GraphQL and REST*. Comparación de modelo de datos, endpoint único vs. recursos, over-fetching/under-fetching, y casos de uso recomendados para cada enfoque. https://aws.amazon.com/es/compare/the-difference-between-graphql-and-rest/
