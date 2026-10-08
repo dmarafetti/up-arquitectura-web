@@ -104,7 +104,72 @@ h1 {
 }
 ```
 
-Cuando el navegador procesa una página, construye primero el árbol DOM a partir del HTML; en paralelo interpreta las reglas CSS (inline, embebidas o en archivos externos enlazados con `<link>`) y las combina con los estilos por defecto del user agent para producir un **árbol de renderizado** (*render tree*), que finalmente se pinta en pantalla. Cuando varias reglas compiten por la misma propiedad de un mismo elemento, el navegador resuelve el conflicto mediante la **cascada** (el orden en que las reglas aparecen y su origen) y la **especificidad** (el "peso" del selector: un selector de ID pesa más que uno de clase, que a su vez pesa más que uno de elemento).
+Cuando el navegador procesa una página, construye primero el árbol DOM a partir del HTML; en paralelo interpreta las reglas CSS (inline, embebidas o en archivos externos enlazados con `<link>`) y las combina con los estilos por defecto del user agent para producir un **árbol de renderizado** (*render tree*), que finalmente se pinta en pantalla. Cuando varias reglas compiten por la misma propiedad de un mismo elemento, el navegador resuelve el conflicto mediante la **cascada** (el orden en que las reglas aparecen y su origen) y la **especificidad** (el "peso" del selector: un selector de ID pesa más que uno de clase, que a su vez pesa más que uno de elemento; ver *Especificidad y cascada* más abajo).
+
+### Especificidad y cascada
+
+Cuando dos o más reglas del mismo origen apuntan a la misma propiedad de un mismo elemento, el navegador decide cuál aplicar comparando la **especificidad** de sus selectores. La especificidad se expresa como una tripla **ID – CLASE – TIPO**, y cada columna cuenta un tipo de componente del selector:
+
+| Columna | Qué suma | Ejemplos |
+|---|---|---|
+| ID (1-0-0) | Selectores de ID | `#menu` |
+| CLASE (0-1-0) | Clases, selectores de atributo y pseudo-clases | `.card`, `[type="radio"]`, `:hover` |
+| TIPO (0-0-1) | Selectores de elemento y pseudo-elementos | `p`, `h1`, `::before` |
+| Sin peso (0-0-0) | Selector universal, combinadores (`>`, `+`, `~`, espacio) y `:where()` | `*` |
+
+Las columnas **no se suman entre sí** como un número decimal: se comparan de izquierda a derecha. Primero gana la que tenga más IDs; si empatan, la que tenga más clases; si vuelven a empatar, la que tenga más elementos. Si las tres columnas empatan, gana la regla declarada **más tarde** en el código.
+
+```css
+p                { color: black; }   /* 0-0-1 */
+.card p          { color: gray; }    /* 0-1-1 */
+.card p:hover    { color: navy; }    /* 0-2-1 */
+#main .card p    { color: teal; }    /* 1-1-1 */
+```
+
+Una consecuencia importante es que una sola columna superior supera a cualquier cantidad de la columna inferior. En el siguiente ejemplo el botón se ve verde, aunque el segundo selector tenga más componentes:
+
+```html
+<button id="guardar" class="btn btn-primary">Guardar</button>
+```
+
+```css
+#guardar          { background: green; }  /* 1-0-0 */
+.btn.btn-primary  { background: blue; }   /* 0-2-0 */
+```
+
+**Pseudo-clases que cambian el cálculo.** `:is()`, `:not()` y `:has()` no aportan peso propio, pero toman el del argumento más específico de su lista. `:where()`, en cambio, siempre vale 0-0-0, sin importar qué contenga:
+
+```css
+:is(h1, h2, h3)          { color: blue; }  /* 0-0-1 */
+:is(h1, h2, #titulo)     { color: blue; }  /* 1-0-0: toma el peso del ID */
+div:not(.interno) p      { color: red; }   /* 0-1-2 */
+
+:where(#tema) a          { color: red; }   /* 0-0-1: el ID no cuenta */
+footer a                 { color: blue; }  /* 0-0-2: lo sobrescribe */
+```
+
+Esto hace de `:where()` una herramienta útil para escribir estilos base que otras reglas puedan sobrescribir con facilidad.
+
+**Estilos inline y `!important`.** Los estilos escritos en el atributo `style` tienen la especificidad más alta posible: equivalen a una cuarta columna a la izquierda de las otras tres (1-0-0-0), por lo que superan a cualquier selector de una hoja de estilos. Solo `!important` puede sobrescribirlos:
+
+```html
+<p style="color: purple">Texto</p>
+```
+
+```css
+p[style*="purple"] {
+  color: rebeccapurple !important; /* sobrescribe el estilo inline */
+}
+```
+
+Cuando dos declaraciones `!important` compiten por la misma propiedad, vuelve a decidir la especificidad de sus selectores.
+
+**Recomendaciones.** Conviene mantener la especificidad baja y uniforme, para que las reglas puedan sobrescribirse sin recurrir a selectores cada vez más largos:
+
+- Preferir selectores de clase sobre IDs y evitar el anidamiento excesivo.
+- Si hay que bajar el peso de un ID, usar `[id="menu"]` (0-1-0) o `:where(#menu)` (0-0-0).
+- Evitar `!important`: cada uso obliga a que la siguiente excepción también lo use.
+- Si hay que subir el peso de forma puntual, duplicar la clase (`.btn.btn-primary`) es válido, pero conviene hacerlo con moderación y dejar un comentario que explique el motivo.
 
 ### Box model
 
@@ -484,6 +549,8 @@ Los tres lenguajes que interpreta el navegador (HTML, CSS y JavaScript) mantiene
 - MDN Web Docs. "Basic HTML syntax." Módulo *Learn web development — Core*, Mozilla. Secciones "Anatomy of an HTML element", "Attributes", "Nesting elements", "Anatomy of an HTML document" y "Whitespace in HTML". https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Basic_HTML_syntax
 - MDN Web Docs. "Structuring documents." Módulo *Learn web development — Core*, Mozilla. Secciones sobre elementos semánticos (`header`, `nav`, `main`, `article`, `section`, `aside`, `footer`) y su rol en accesibilidad y SEO. https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Structuring_documents
 - MDN Web Docs. "What is CSS?" Módulo *Learn web development — Core*, Mozilla. Secciones "CSS syntax" y "How is CSS applied to HTML". https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/What_is_CSS
+- MDN Web Docs. "Specificity." Guía *CSS cascade*, Mozilla. Secciones "How is specificity calculated?", "Exceptions to the rules" y "Tips for handling specificity". https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascade/Specificity
+- web.dev. "Specificity." Curso *Learn CSS*, Google. Secciones sobre cálculo A-B-C, `:not()`, `:is()` y `:where()`. https://web.dev/learn/css/specificity
 - W3C. "CSS Snapshot 2026." *W3C Technical Reports*. Secciones "Introduction" y clasificación de módulos por estado de estabilidad (especificaciones estables, recomendaciones candidatas, módulos relativamente estables). https://www.w3.org/TR/css-2026/
 - Sass. "Sass Documentation." Secciones "Sass Basics" (variables, nesting, mixins, partials e imports, funciones). https://sass-lang.com/documentation/
 - Tailwind CSS. "Styling with utility classes." Documentación oficial. Secciones "Why not just use inline styles?", "Thinking in utility classes" y "Managing duplication". https://tailwindcss.com/docs/styling-with-utility-classes
