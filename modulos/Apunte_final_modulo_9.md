@@ -83,9 +83,9 @@ flowchart TD
 
 **Figura 1 — Árbol DOM resultante del parseo de un documento HTML.** El nodo raíz `Document` contiene un único `DocumentType` y un único elemento `html`, del cual cuelgan `head` y `body`. Cada elemento de texto visible en la página se representa como un nodo `Text` hijo del elemento que lo contiene, nunca como parte del propio elemento.
 
-## La DOM API
+## DOM API
 
-La **DOM API** es el conjunto de interfaces, métodos y propiedades que permiten leer y modificar el árbol descrito arriba. Conviene dividirla en cuatro bloques funcionales: selección de nodos, recorrido (*traversal*) del árbol, construcción/actualización del árbol, y manejo de eventos.
+La **API del DOM** es el conjunto de interfaces, métodos y propiedades que permiten leer y modificar el árbol descrito arriba. Conviene dividirla en cuatro bloques funcionales: selección de nodos, recorrido (*traversal*) del árbol, construcción/actualización del árbol, y manejo de eventos.
 
 ### Selección de nodos
 
@@ -263,7 +263,7 @@ El DOM es la API central para representar y modificar un documento, pero no es l
 
 ## Por qué la manipulación directa del DOM no escala
 
-Trabajar con la DOM API tal como se describió es perfectamente viable para páginas simples: pocos elementos, pocas interacciones, actualizaciones esporádicas. El problema aparece cuando la aplicación crece en complejidad de estado y de interfaz, un escenario habitual en lo que se conoce como **aplicaciones de página única** (*single-page applications*).
+Trabajar con la API del DOM tal como se describió es perfectamente viable para páginas simples: pocos elementos, pocas interacciones, actualizaciones esporádicas. El problema aparece cuando la aplicación crece en complejidad de estado y de interfaz, un escenario habitual en lo que se conoce como **aplicaciones de página única** (*single-page applications*).
 
 Hay al menos tres razones concretas por las que la manipulación manual del DOM se vuelve difícil de sostener:
 
